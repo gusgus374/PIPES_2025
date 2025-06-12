@@ -66,7 +66,7 @@ st.subheader("🏆 Step 2: Tournament Selection and Data Loading")
 tournament_options = {
     "Euro 2024": {
         "competition_id": 55,
-        "season_id": 182,
+        "season_id": 282,
         "description": "Lamine Yamal's breakout tournament"
     },
     "La Liga (Barcelona - Young Messi Era)": {
