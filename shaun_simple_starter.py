@@ -2,264 +2,161 @@
 🌟 Shaun's Player Comparison Project
 ==================================
 
-Copy this code into your shaun.py file and complete the TODOs!
-This will help you compare Lamine Yamal and Messi's performances.
+**Your Mission:** Compare Lamine Yamal at Euro 2024 to a young Lionel Messi
+at Barcelona in the 2004/2005 season.
+
+Complete the TODOs below to build your analysis!
 """
 
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 from mplsoccer import Sbopen
 
-# TODO 1: Add your title and introduction
-st.title("🌟 Shaun's Player Analysis: Yamal vs Messi")
-st.write("Comparing generational talents across different eras!")
+# --- Page Setup ---
+st.set_page_config(layout="wide")
+st.title("🌟 Shaun's Player Analysis: Yamal vs. Messi")
+st.write("Comparing a rising star to a young legend across different competitions and eras.")
 
-# TODO 2: Load data functions (provided for you)
+# --- Data Loading Functions (Provided for you) ---
 @st.cache_data
-def load_match_data(competition_id, season_id):
-    """Load match data from StatsBomb API"""
+def load_all_events(competition_id, season_id):
+    """Loads all event data for a specific competition season."""
     parser = Sbopen()
-    return parser.match(competition_id=competition_id, season_id=season_id)
+    try:
+        df_matches = parser.match(competition_id=competition_id, season_id=season_id)
+        match_ids = df_matches['match_id'].tolist()
 
-@st.cache_data
-def load_event_data(match_id):
-    """Load event data for a specific match"""
-    parser = Sbopen()
-    return parser.event(match_id)[0]
+        all_events = []
+        progress_text = f"Loading {len(match_ids)} matches for competition {competition_id}..."
+        progress_bar = st.progress(0, text=progress_text)
 
-@st.cache_data
-def get_player_data(df_matches, player_name, team_name=None):
-    """Get all data for a specific player from a tournament"""
-    match_ids = df_matches["match_id"].tolist()
-    player_data = []
+        for i, match_id in enumerate(match_ids):
+            events = parser.event(match_id)[0]
+            all_events.append(events)
+            progress_bar.progress((i + 1) / len(match_ids), text=f"Loaded match {i+1}/{len(match_ids)}")
 
-    progress = st.progress(0)
-    for i, match_id in enumerate(match_ids):
-        try:
-            events = load_event_data(match_id)
+        progress_bar.empty()
+        return pd.concat(all_events, ignore_index=True)
 
-            if not events.empty and 'player_name' in events.columns:
-                # Find player events (fuzzy matching)
-                player_events = events[
-                    events['player_name'].str.contains(player_name, case=False, na=False)
-                ]
+    except Exception:
+        st.error(f"Could not load data for competition {competition_id}, season {season_id}. The data might not be available in StatsBomb's free data.")
+        return pd.DataFrame()
 
-                # Filter by team if provided
-                if team_name and 'team_name' in events.columns:
-                    player_events = player_events[
-                        player_events['team_name'].str.contains(team_name, case=False, na=False)
-                    ]
+# TODO 1: Define the competition and season IDs
+YAMAL_COMP_ID = 55      # Euro
+YAMAL_SEASON_ID = 282   # 2024 Season
 
-                if not player_events.empty:
-                    player_events['match_id'] = match_id
-                    player_data.append(player_events)
+MESSI_COMP_ID = 11      # La Liga
+MESSI_SEASON_ID = 37    # 2004/2005 Season
 
-            progress.progress((i + 1) / len(match_ids))
-        except:
-            continue
+# --- Data Loading Section ---
+st.subheader("1. Loading Data from Two Different Competitions")
 
-    progress.empty()
+# Load Yamal's data
+st.write("Loading Lamine Yamal's Euro 2024 data...")
+yamal_events = load_all_events(YAMAL_COMP_ID, YAMAL_SEASON_ID)
+if not yamal_events.empty:
+    yamal_data = yamal_events[yamal_events['player_name'].str.contains("Lamine Yamal", na=False)]
+    st.success(f"✅ Found {len(yamal_data)} events for Lamine Yamal.")
+else:
+    yamal_data = pd.DataFrame()
 
-    if player_data:
-        return pd.concat(player_data, ignore_index=True)
-    return pd.DataFrame()
+# Load Messi's data
+st.write("Loading young Lionel Messi's 2004/05 La Liga data...")
+messi_events = load_all_events(MESSI_COMP_ID, MESSI_SEASON_ID)
+if not messi_events.empty:
+    messi_data = messi_events[messi_events['player_name'].str.contains("Lionel Messi", na=False)]
+    st.success(f"✅ Found {len(messi_data)} events for Lionel Messi.")
+else:
+    messi_data = pd.DataFrame()
 
-# TODO 3: Player analysis function
-def analyze_player(player_data):
-    """Analyze a player's performance from their event data"""
+# --- Analysis Function ---
+def analyze_player(player_df, player_name):
+    """Calculates key per-90 stats for a player."""
+    if player_df.empty:
+        return None
 
-    if player_data.empty:
-        return {}
+    # Calculate total minutes played (estimated)
+    minutes_played = player_df.groupby('match_id')['minute'].max().sum()
+    if minutes_played == 0:
+        return None
 
-    # Basic info
-    matches_played = player_data['match_id'].nunique()
+    per_90_factor = 90 / minutes_played
 
-    # Calculate minutes played
-    minutes_per_match = player_data.groupby('match_id')['minute'].max()
-    total_minutes = minutes_per_match.sum()
+    # TODO 2: Calculate stats
+    # Find all the shots the player took
+    shots = player_df[player_df['type_name'] == 'Shot']
+    # Find all the goals the player scored
+    goals = shots[shots['outcome_name'] == 'Goal']
+    # Find all the dribbles the player attempted
+    dribbles = player_df[player_df['type_name'] == 'Dribble']
+    # Find successful dribbles
+    successful_dribbles = dribbles[dribbles['outcome_name'] == 'Complete']
 
-    # Goals and shots
-    shots = player_data[player_data['type_name'] == 'Shot']
-    goals = shots[shots['outcome_name'] == 'Goal'] if not shots.empty else pd.DataFrame()
-
-    # Passes
-    passes = player_data[player_data['type_name'] == 'Pass']
-    successful_passes = passes[passes['outcome_name'].isna()] if not passes.empty else pd.DataFrame()
-
-    # Dribbles
-    dribbles = player_data[player_data['type_name'] == 'Dribble']
-    successful_dribbles = dribbles[dribbles['outcome_name'] == 'Complete'] if not dribbles.empty else pd.DataFrame()
-
-    # Calculate per-90 stats
-    minutes_factor = 90 / total_minutes if total_minutes > 0 else 0
-
-    return {
-        'matches_played': matches_played,
-        'minutes_played': total_minutes,
-        'goals': len(goals),
-        'shots': len(shots),
-        'goals_per_90': len(goals) * minutes_factor,
-        'shots_per_90': len(shots) * minutes_factor,
-        'pass_completion': len(successful_passes) / len(passes) * 100 if len(passes) > 0 else 0,
-        'dribbles_per_90': len(dribbles) * minutes_factor,
-        'dribble_success': len(successful_dribbles) / len(dribbles) * 100 if len(dribbles) > 0 else 0
+    # Create a dictionary with all the calculated stats
+    stats = {
+        "Player": player_name,
+        "Minutes Played": minutes_played,
+        "Goals per 90": len(goals) * per_90_factor,
+        "Shots per 90": len(shots) * per_90_factor,
+        "Dribbles per 90": len(dribbles) * per_90_factor,
+        "Dribble Success (%)": (len(successful_dribbles) / len(dribbles) * 100) if len(dribbles) > 0 else 0
     }
+    return stats
 
-# TODO 4: Load tournament data
-st.subheader("Step 1: Tournament Selection")
+# --- Run Analysis and Display ---
+st.subheader("2. Comparing Their Performance")
 
-tournament_options = {
-    "Euro 2024": {"competition_id": 55, "season_id": 182},
-    "La Liga (Barcelona - Young Messi Era)": {"competition_id": 11, "season_id": 37},
-    "2022 FIFA World Cup (Qatar)": {"competition_id": 43, "season_id": 3},
-    "2018 FIFA World Cup (Russia)": {"competition_id": 43, "season_id": 106}
-}
+# Run the analysis for both players
+yamal_stats = analyze_player(yamal_data, "Lamine Yamal (Euro 2024)")
+messi_stats = analyze_player(messi_data, "Lionel Messi (La Liga '04/05)")
 
-selected_tournament = st.selectbox("Choose Tournament:", list(tournament_options.keys()))
-tournament_config = tournament_options[selected_tournament]
+# TODO 3: Create the comparison DataFrame
+if yamal_stats and messi_stats:
+    # Combine the stats dictionaries into a list
+    comparison_list = [yamal_stats, messi_stats]
+    # Create the DataFrame
+    df_comparison = pd.DataFrame(comparison_list)
 
-# Load tournament data
-st.write(f"Loading {selected_tournament}...")
-tournament_matches = load_match_data(
-    tournament_config["competition_id"],
-    tournament_config["season_id"]
+    st.subheader("Comparison Table")
+    st.dataframe(df_comparison.set_index("Player").round(2), use_container_width=True)
+
+    # TODO 4: Create the visualization
+    st.subheader("Visual Comparison")
+
+    # "Melt" the dataframe to prepare it for plotting
+    df_melted = df_comparison.melt(
+        id_vars='Player',
+        value_vars=['Goals per 90', 'Shots per 90', 'Dribbles per 90'],
+        var_name='Metric',
+        value_name='Value'
+    )
+
+    # Create the bar chart
+    fig = px.bar(
+        df_melted,
+        x='Metric',
+        y='Value',
+        color='Player',
+        barmode='group',
+        title='Per 90 Minute Comparison: Yamal vs. Young Messi'
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+else:
+    st.warning("Could not generate comparison. Check if data was loaded correctly for both players.")
+
+# --- Your Conclusions ---
+st.subheader("3. Your Analysis and Hot Takes!")
+st.write("Based on the data, what are your thoughts? This is where you become the analyst.")
+
+# TODO 5: Write your conclusions
+your_analysis = st.text_area(
+    "What's your hot take? What does the data tell you about these two players at similar stages?",
+    "Based on the data, I noticed that..."
 )
-st.success(f"✅ Loaded {len(tournament_matches)} matches!")
 
-# TODO 5: Player selection
-st.subheader("Step 2: Player Selection")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.write("**Player 1:**")
-    player1_name = st.text_input("Player 1 Name:", value="Lamine Yamal")
-    player1_team = st.text_input("Player 1 Team:", value="Spain")
-
-with col2:
-    st.write("**Player 2:**")
-    player2_name = st.text_input("Player 2 Name:", value="Messi")
-    player2_team = st.text_input("Player 2 Team:", value="Barcelona")
-
-# TODO 6: Analyze players when button is clicked
-if st.button("🔍 Analyze Both Players"):
-
-    # Get player data
-    with st.spinner(f"Loading data for {player1_name}..."):
-        player1_data = get_player_data(tournament_matches, player1_name, player1_team)
-
-    with st.spinner(f"Loading data for {player2_name}..."):
-        player2_data = get_player_data(tournament_matches, player2_name, player2_team)
-
-    # Analyze both players
-    if not player1_data.empty and not player2_data.empty:
-        player1_stats = analyze_player(player1_data)
-        player2_stats = analyze_player(player2_data)
-
-        st.success("✅ Found data for both players!")
-
-        # TODO 7: Display player statistics
-        st.subheader("Step 3: Player Statistics")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.write(f"**{player1_name} Stats:**")
-            st.metric("Matches Played", player1_stats['matches_played'])
-            st.metric("Goals", player1_stats['goals'])
-            st.metric("Goals per 90", f"{player1_stats['goals_per_90']:.2f}")
-            st.metric("Shots per 90", f"{player1_stats['shots_per_90']:.2f}")
-            st.metric("Pass Completion %", f"{player1_stats['pass_completion']:.1f}%")
-
-        with col2:
-            st.write(f"**{player2_name} Stats:**")
-            st.metric("Matches Played", player2_stats['matches_played'])
-            st.metric("Goals", player2_stats['goals'])
-            st.metric("Goals per 90", f"{player2_stats['goals_per_90']:.2f}")
-            st.metric("Shots per 90", f"{player2_stats['shots_per_90']:.2f}")
-            st.metric("Pass Completion %", f"{player2_stats['pass_completion']:.1f}%")
-
-        # TODO 8: Create comparison table
-        st.subheader("Step 4: Direct Comparison")
-
-        comparison_data = {
-            'Metric': ['Goals per 90', 'Shots per 90', 'Pass Completion %', 'Dribbles per 90'],
-            player1_name: [
-                player1_stats['goals_per_90'],
-                player1_stats['shots_per_90'],
-                player1_stats['pass_completion'],
-                player1_stats['dribbles_per_90']
-            ],
-            player2_name: [
-                player2_stats['goals_per_90'],
-                player2_stats['shots_per_90'],
-                player2_stats['pass_completion'],
-                player2_stats['dribbles_per_90']
-            ]
-        }
-
-        comparison_df = pd.DataFrame(comparison_data)
-        st.dataframe(comparison_df, use_container_width=True)
-
-        # TODO 9: Create visualization
-        st.subheader("Step 5: Visual Comparison")
-
-        # Prepare data for bar chart
-        metrics = ['Goals per 90', 'Shots per 90', 'Dribbles per 90']
-        plot_data = {
-            'Metric': metrics + metrics,
-            'Value': [
-                player1_stats['goals_per_90'],
-                player1_stats['shots_per_90'],
-                player1_stats['dribbles_per_90'],
-                player2_stats['goals_per_90'],
-                player2_stats['shots_per_90'],
-                player2_stats['dribbles_per_90']
-            ],
-            'Player': [player1_name] * 3 + [player2_name] * 3
-        }
-
-        plot_df = pd.DataFrame(plot_data)
-
-        # Create bar chart
-        fig = px.bar(plot_df, x='Metric', y='Value', color='Player',
-                    title=f'Performance Comparison: {player1_name} vs {player2_name}',
-                    barmode='group')
-        st.plotly_chart(fig, use_container_width=True)
-
-    else:
-        if player1_data.empty:
-            st.warning(f"⚠️ No data found for {player1_name}")
-        if player2_data.empty:
-            st.warning(f"⚠️ No data found for {player2_name}")
-
-# TODO 10: Add your conclusions
-st.subheader("My Analysis")
-st.write("""
-Based on my comparison analysis:
-
-**Key Findings:**
-- [TODO: Which player had better goal scoring stats?]
-- [TODO: Who was more efficient in front of goal?]
-- [TODO: What differences did you notice in their playing styles?]
-
-**What I learned:**
-- How to load and analyze individual player data
-- How to create fair comparisons using per-90 minute stats
-- How to visualize player performance differences
-- How to think like a scout when evaluating talent!
-
-**Why this matters:**
-This type of analysis helps us understand what makes players special
-and how different talents can be compared fairly across tournaments.
-""")
-
-# Add some fun
-if st.button("🏆 I'm a Player Analyst!"):
+if st.button("Submit My Hot Take 🔥"):
+    st.success("Great analysis! That's what professional scouting is all about.")
     st.balloons()
-    st.write("You just analyzed players like a professional scout!")
-
-st.write("---")
-st.write("*Analysis by Shaun using StatsBomb professional data*")

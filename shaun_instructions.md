@@ -1,113 +1,67 @@
 # Shaun's Tutorial Session Instructions
 
 ## Files Created
-1. **`shaun_tutorial.py`** - Complete step-by-step tutorial with player comparison framework
-2. **`shaun_simple_starter.py`** - Simplified template for his to work on
-3. **`shaun_instructions.md`** - This file (instructor notes)
+1. **`shaun_tutorial.py`** - A complete, simplified tutorial on cross-competition analysis.
+2. **`shaun_simple_starter.py`** - A focused starter template for Shaun to complete.
+3. **`shaun_instructions.md`** - This file (instructor notes).
+
+## Session Goal: Cross-Competition Analysis
+The main goal is to teach Shaun how to compare two players from **different datasets**. This is a more advanced and realistic data science scenario than comparing players within the same file.
+
+**Core Question:** How does Lamine Yamal's performance at Euro 2024 compare to a young Lionel Messi's during the 2004/2005 La Liga season?
 
 ## Session Structure (90 minutes)
 
-### Phase 1: Tutorial Walkthrough (30 minutes)
-- Run `streamlit run shaun_tutorial.py`
-- Walk through the player analysis framework
-- Focus on understanding these concepts:
-  - Individual player data extraction from tournament data
-  - Per-90 minute statistics for fair comparison
-  - Fuzzy player name matching (handling variations)
-  - Player-specific vs team-level analysis
+### Phase 1: Understanding the Concept (20 minutes)
+- **Problem:** We have two players in two separate competitions. We can't just filter one file.
+- **Solution:**
+  1. Load the Euro 2024 dataset.
+  2. Isolate all of Yamal's events.
+  3. Load the La Liga 2004/05 dataset.
+  4. Isolate all of Messi's events.
+  5. Analyze each player's data *separately*.
+  6. Combine the final, summarized stats for comparison.
+- Walk through `shaun_tutorial.py` to demonstrate this workflow.
 
-### Phase 2: Independent Work (45 minutes)
-- Give him `shaun_simple_starter.py` to copy into his `shaun.py` file
-- He works through the TODOs independently
-- You provide guidance when needed
-- Key learning objectives:
-  1. Understanding player-specific data filtering
-  2. Calculating meaningful individual metrics
-  3. Creating fair comparisons across tournaments
-  4. Building comparative visualizations
+### Phase 2: Independent Work (50 minutes)
+- Give him `shaun_simple_starter.py` to copy into his `shaun.py` file.
+- Shaun's task is to fill in the `TODO` sections. This reinforces the logic:
+  - Defining the correct IDs.
+  - Calculating the key stats in the `analyze_player` function.
+  - Combining the final stats into a comparison DataFrame.
+  - Building the final visualization.
+- This is a less complex but more conceptually important task.
 
-### Phase 3: Personalization (15 minutes)
-- Help him focus on Lamine Yamal vs Messi comparison
-- Add insights about what makes each player special
-- Practice explaining findings for tomorrow's presentation
+### Phase 3: Analysis and Storytelling (20 minutes)
+- Once the code works, shift focus to the "so what?"
+- Help him interpret the comparison table and chart.
+- Discuss the context (Euros vs. La Liga, team quality, player age).
+- Help him write his "Hot Take" and practice explaining his findings for the presentation.
 
-## Key Player Analysis Concepts to Emphasize
+## Key Data Science Concepts to Emphasize
 
-1. **Player Data Extraction**:
-   ```python
-   # Fuzzy matching for player names
-   player_events = events[events['player_name'].str.contains(player_name, case=False, na=False)]
-   ```
+1.  **Handling Disparate Data Sources:** This is the core lesson. Emphasize that in the real world, data rarely comes in one clean file. The process of loading, filtering, and standardizing data from different sources is fundamental.
 
-2. **Per-90 Minute Statistics**:
-   - Fair comparison across different playing time
-   - Standard metric in professional scouting
-   - Formula: `(stat_total / minutes_played) * 90`
+2.  **Per-90-Minute Statistics:** Reinforce why this is crucial for a fair comparison. Yamal and Messi will have played different numbers of minutes, so raw totals (like total goals) are misleading.
 
-3. **Key Metrics for Attackers**:
-   - Goals per 90 (productivity)
-   - Shots per 90 (attacking involvement)
-   - Dribbles per 90 (creativity/style)
-   - Pass completion % (technical ability)
+3.  **Data "Melting" for Visualization:** Briefly explain the concept of converting a "wide" DataFrame into a "long" one to make it compatible with plotting libraries like Plotly Express.
+    -   **Wide:** One row per player, one column per metric.
+    -   **Long:** One row per observation (e.g., one row for Yamal's "Goals per 90", another for Messi's).
 
-4. **Comparison Framework**: Individual performance → Standardized metrics → Visual comparison
+## Correct Data IDs
+-   **Lamine Yamal (Euro 2024):**
+    -   `competition_id = 55`
+    -   `season_id = 282`
+-   **Lionel Messi (La Liga 2004/05):**
+    -   `competition_id = 11`
+    -   `season_id = 37`
 
-## Data Strategy Notes
-- **Primary**: Euro 2024 for Lamine Yamal data (competition_id: 55, season_id: 182)
-- **Primary**: La Liga Barcelona data for young Messi (competition_id: 11, season_id: 37)
-- **Alternative**: 2022 World Cup for mature Messi comparison
-- **Alternative**: 2018 World Cup for different era comparison
-- **Perfect Match**: This gives Yamal vs young Messi - much better for generational comparison!
+## Presentation Prep
+Help Shaun structure his story:
+1.  **The Question:** "I wanted to compare a modern prodigy, Lamine Yamal, to a young legend, Lionel Messi, to see how they stack up."
+2.  **The Challenge:** "They never played in the same competition at that age, so I had to pull data from two different seasons: Euro 2024 and La Liga 2004/05."
+3.  **The Method:** "I loaded both datasets, isolated each player, calculated their 'per 90 minute' stats to be fair, and then combined them."
+4.  **The Findings:** "My chart shows that..." (He explains the visual).
+5.  **The "Hot Take":** "While Player X was better at..., Player Y excelled at... This shows that..." (He adds his own context and analysis).
 
-## Common Issues to Watch For
-- Player name variations (e.g., "Lionel Messi" vs "L. Messi")
-- Code includes fuzzy matching to handle this
-- Minutes calculation is estimated from last event per match
-- Some players may not appear in certain tournaments
-- Help him understand why per-90 stats are crucial for fair comparison
-
-## Presentation Prep - Key Questions to Address
-1. **What question are you answering?**
-   - "How does Lamine Yamal's style compare to Messi's?"
-
-2. **What makes this analysis valuable?**
-   - Individual player scouting techniques
-   - Fair comparison across different eras/tournaments
-
-3. **Key findings to highlight:**
-   - Efficiency differences (goals per shot)
-   - Playing style differences (dribbling vs passing)
-   - What makes each player unique
-
-4. **What he learned:**
-   - Professional scouting analysis techniques
-   - How to standardize comparisons
-   - Individual vs team analysis approaches
-
-## Extension Ideas (if he finishes early)
-- Add more metrics (key passes, progressive carries)
-- Age-adjusted analysis (performance per age)
-- Tournament progression analysis (how performance changed)
-- Position heat map analysis
-- Pressure situation analysis
-
-## Success Metrics
-By the end, Shaun should be able to:
-- Extract individual player data from tournament datasets
-- Calculate and explain per-90 minute statistics
-- Create meaningful comparisons between players from different contexts
-- Explain what makes each player's style unique
-- Present findings about generational talent comparison
-
-## Technical Learning Goals
-- **Data filtering**: Player-specific extraction from large datasets
-- **Statistical normalization**: Per-90 calculations for fair comparison
-- **Comparative analysis**: Building side-by-side metrics
-- **Visualization**: Creating clear comparison charts
-- **Professional insight**: Understanding what scouts look for in players
-
-## Coaching Points
-- Emphasize that numbers don't tell the whole story
-- Help him understand context (different tournaments, eras, team styles)
-- Focus on what makes each player special, not just who's "better"
-- This is the same type of analysis used by professional clubs for scouting
+This narrative is much more compelling than just showing a chart. It tells the story of his data science process.
