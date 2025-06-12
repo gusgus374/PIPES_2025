@@ -13,3 +13,4 @@ plotly
 six
 streamlit-extras
 streamlit-lottie
+scikit-learn
