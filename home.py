@@ -104,7 +104,6 @@ st.subheader('So Soccer Data Scientists ask questions like...')
 st.subheader('Explore some data with us!')
 
 
-
 st.divider()
 list = [27,68,71,87,91,100]
 #st.write(len(list))

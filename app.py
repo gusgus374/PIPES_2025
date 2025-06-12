@@ -19,8 +19,11 @@ st.set_page_config(
 reese = st.Page("./reese.py", title="Reese's App")
 luke = st.Page("./luke.py", title="Luke's App")
 shaun = st.Page("./shaun.py", title="Shaun's App")
+statsbomb = st.Page("./statsbomb.py", title="StatsBomb")
+reese_tutorial = st.Page("./reese_tutorial.py", title="Reese's Tutorial")
+shaun_tutorial = st.Page("./shaun_tutorial.py", title="Shaun's Tutorial")
 
-pg = st.navigation([st.Page("home.py", title="Home"),reese, luke, shaun])
+pg = st.navigation([st.Page("home.py", title="Home"),reese, luke, shaun, statsbomb, reese_tutorial, shaun_tutorial])
 pg.run()
 
 st.logo("./resources/footyLab_v2_96_NB.png",link="https://datarook.com/")

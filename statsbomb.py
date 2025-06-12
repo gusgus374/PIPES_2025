@@ -35,7 +35,7 @@ if st.button("🔄 Clear Cache (for debugging)", help="Clear all cached data and
     st.rerun()
 
 # Add Coach Gus introduction
-coach_message = st.chat_message(name="Coach Gus", avatar="./media/profile_coachGus.JPG")
+coach_message = st.chat_message(name="Coach Gus", avatar="./resources/profile_coachGus.JPG")
 with coach_message:
     st.write("Welcome to the world of professional soccer analytics! "
              "Today we're going to explore the same type of data that top clubs "
@@ -76,7 +76,7 @@ tournament_config = tournament_options[selected_tournament]
 competition_id = tournament_config["competition_id"]
 season_id = tournament_config["season_id"]
 
-coach_message = st.chat_message(name="Coach Gus", avatar="./media/profile_coachGus.JPG")
+coach_message = st.chat_message(name="Coach Gus", avatar="./resources/profile_coachGus.JPG")
 with coach_message:
     st.write(f"Great choice! You've selected the **{selected_tournament}**. "
              "This tournament has some of the most exciting soccer data available!")
@@ -593,7 +593,7 @@ no_games = len(match_ids)
 
 st.header("Important Actions")
 
-coach_message = st.chat_message(name="Coach Gus", avatar="./media/profile_coachGus.JPG")
+coach_message = st.chat_message(name="Coach Gus", avatar="./resources/profile_coachGus.JPG")
 with coach_message:
     st.write("Let's calculate some advanced metrics for our players. "
              "These are the same types of statistics that professional analysts use!")
@@ -643,7 +643,7 @@ else:
 
 st.header("🎯 Player Comparison Radar Charts")
 
-coach_message = st.chat_message(name="Coach Gus", avatar="./media/profile_coachGus.JPG")
+coach_message = st.chat_message(name="Coach Gus", avatar="./resources/profile_coachGus.JPG")
 with coach_message:
     st.write("Now for the really cool part - radar charts! "
              "These show how players compare to each other across multiple metrics.")
@@ -941,7 +941,7 @@ if selected_player_options:
         st.pyplot(fig)
 
         # Add explanation
-        coach_message = st.chat_message(name="Coach Gus", avatar="./media/profile_coachGus.JPG")
+        coach_message = st.chat_message(name="Coach Gus", avatar="./resources/profile_coachGus.JPG")
         with coach_message:
             st.write("🎯 **How to read these radar charts:**")
             st.write("-Each point shows what percentile the player is in compared to ALL midfielders in the tournament")
@@ -1092,7 +1092,7 @@ with st.echo():
 
 st.subheader("Scoring Important Goals")
 
-coach_message = st.chat_message(name="Coach Gus", avatar="./media/profile_coachGus.JPG")
+coach_message = st.chat_message(name="Coach Gus", avatar="./resources/profile_coachGus.JPG")
 with coach_message:
     st.write("🎯 **What we've learned today:**")
     st.write("- Event-level data gives us incredible insights into player performance")
@@ -1124,7 +1124,7 @@ if player_metrics:
     metrics_df = pd.DataFrame(player_metrics).T
     st.dataframe(metrics_df, use_container_width=True)
 
-coach_message = st.chat_message(name="Coach Gus", avatar="./media/profile_coachGus.JPG")
+coach_message = st.chat_message(name="Coach Gus", avatar="./resources/profile_coachGus.JPG")
 with coach_message:
     st.write("🚀 **Next Steps:**")
     st.write("- Try changing the selected player and team to explore different playing styles")
