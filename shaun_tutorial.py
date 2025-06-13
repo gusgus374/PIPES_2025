@@ -18,7 +18,7 @@ Let's get started! 🎯
 
 import streamlit as st
 import pandas as pd
-import plotly.express as px
+import altair as alt
 from mplsoccer import Sbopen
 
 st.title("🌟 Shaun's Player Comparison")
@@ -207,7 +207,7 @@ if len(all_stats) == 2:
     # --- Visualization ---
     st.subheader("Visual Comparison")
 
-    # We need to "melt" the DataFrame to make it easy to plot with Plotly Express
+    # We need to "melt" the DataFrame to make it easy to plot with Altair
     df_melted = df_comparison.melt(
         id_vars='Player',
         value_vars=['Goals per 90', 'Shots per 90', 'Dribbles per 90'],
@@ -215,15 +215,19 @@ if len(all_stats) == 2:
         value_name='Value'
     )
 
-    fig = px.bar(
-        df_melted,
-        x='Metric',
-        y='Value',
-        color='Player',
-        barmode='group',
-        title='Per 90 Minute Comparison: Yamal vs. Young Messi'
-    )
-    st.plotly_chart(fig, use_container_width=True)
+    chart = alt.Chart(df_melted).mark_bar().encode(
+        x=alt.X('Metric:N', title='Metric'),
+        y=alt.Y('Value:Q', title='Value'),
+        color=alt.Color('Player:N', title='Player'),
+        xOffset='Player:N',
+        tooltip=['Player', 'Metric', 'Value']
+    ).properties(
+        title='Per 90 Minute Comparison: Yamal vs. Young Messi',
+        width=600,
+        height=400
+    ).interactive()
+
+    st.altair_chart(chart, use_container_width=True)
 else:
     st.info("Could not generate comparison because data for one or both players is missing.")
 

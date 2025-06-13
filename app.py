@@ -25,7 +25,7 @@ shaun_tutorial = st.Page("./shaun_tutorial.py", title="Shaun's Tutorial")
 us_pro_soccer = st.Page("./2_US_Pro_Soccer.py", title="US Pro Soccer")
 luke_tutorial = st.Page("./luke_tutorial.py", title="Luke's Tutorial")
 
-pg = st.navigation([st.Page("home.py", title="Home"),reese, luke, shaun, statsbomb, reese_tutorial, shaun_tutorial, us_pro_soccer, luke_tutorial])
+pg = st.navigation([st.Page("home.py", title="Home"),reese, luke, shaun])
 pg.run()
 
 st.logo("./resources/footyLab_v2_96_NB.png",link="https://datarook.com/")

@@ -2,6 +2,11 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 import streamlit.components.v1 as components
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+import numpy.random as rnd
+
 
 with st.echo(code_location="below"):
     import streamlit as st
@@ -9,7 +14,8 @@ with st.echo(code_location="below"):
     import altair as alt
     import streamlit.components.v1 as components
     st.title("Welcome to our 2025 UTK PIPES Soccer Data Science App!")
-    st.image("./resources/hard_at_work.jpeg",)
+
+    st.image("./resources/hard_at_work.jpeg",width=600)
 
 
     st.header("Soccer... and Data... *and* Science?")
@@ -96,76 +102,106 @@ st.caption('(instead of "spellbook" the technical term for the word after "impor
 st.header("Soccer Data Science")
 st.write("Looking back at the Venn Diagram above, Data Science is Hacking Skills + Substantive Expertise + Math & Statistics Knowledge ")
 st.write("Let's define these terms in our own words")
-st.write("**Hacking Skills** = making the computer do stuff with code")
-st.write("**Substantive Expertise** = Deep knowledge about a specific topic, like the game of soccer")
-st.write("**Math and Statistics Knowledge** = The ability to analyze things using mathematical tools")
+st.write("**:red[Hacking Skills]** = making the computer do stuff with code")
+st.write("**:blue[Substantive Expertise]** = Deep knowledge about a specific topic, like the game of soccer")
+st.write("**:green[Math and Statistics Knowledge]** = The ability to analyze things using mathematical tools")
 
-st.subheader('So Soccer Data Scientists ask questions like...')
+st.divider()
+
 st.subheader('Explore some data with us!')
+
+st.page_link("./luke.py", label="Mo' money mo' goals?")
+st.page_link("./shaun.py", label="Young Messi vs. Lamine Yamal")
+st.page_link("./reese.py", label="Best attack in the world?")
 
 
 st.divider()
-list = [27,68,71,87,91,100]
-#st.write(len(list))
-my_sum = 0
-for number in list:
-    my_sum = my_sum + number
+st.divider()
+st.header("Simulating goals scored in a professional match")
+#minutes in a match
+match_minutes = 90
 
-average = my_sum/len(list)
-#st.write(my_sum)
-#st.write(average)
-#st.write(27 + 68 + 71 + 87 + 91 + 100)
-#st.write(27*6)
+st.write(f"There are :red[{match_minutes} minutes] in a full-length soccer game")
 
-#if st.button("CELEBRATE"):
-#    st.balloons()
+#average goals per match
+goals_per_match = 2.79
+st.write(f"The average total goals scored is :red[{goals_per_match}] per game")
+#probability of a goal per minute
+prob_per_minute = np.array(goals_per_match/match_minutes)
+
+st.metric("The probability of a goal per minute is", prob_per_minute)
+
+with st.popover("Let's play simulate a game"):
+    if st.button("run simulation"):
+        goals = 0
+
+        for minute in range(match_minutes):
+            #generate a random number
+            r=rnd.rand(1,1)
+
+            if (r < prob_per_minute):
+                #Goal - if the random number is less than the goal probability
+                st.write('minute ' + str(minute) + ': :partying_face:')
+                goals = goals + 1
+                time.sleep(0)
+            else:
+                st.write('minute ' + str(minute) + ': :no_entry:')
+                time.sleep(0.1)
+        st.write("Final whistle. \n \nThere were " + str(goals) + ' goals.')
+        st.subheader("What if we ran this for 380 games?")
+
+def simulateMatch(time, prob):
+    # time - number of time units
+    # prob - probability per time unit of a goal
+    # display_match == True then display simulation output for match.
+
+    # Count the number of goals
+    goals = 0
+
+    for minute in range(time):
+        # Generate a random number between 0 and 1.
+        r = rnd.rand(1, 1)
+        # Prints an X when there is a goal and a zero otherwise.
+        if (r < prob):
+            # Goal - if the random number is less than the goal probability.
+            goals = goals + 1
+
+    return goals
+
+# Number of matches
+num_matches = 380
+
+# Loop over all the matches and print the number of goals.
+goals = np.zeros(num_matches)
+for i in range(num_matches):
+    goals[i] = simulateMatch(match_minutes, prob_per_minute)
+    time.sleep(0.1)
 
 
-framespersecond = 25
+# Create a histogram
 
-minspergame = 90
+# Convert goals array to a DataFrame for Altair
+goals_df = pd.DataFrame({'goals': goals})
 
-seconds_in_a_min = 60
+# Create the Altair histogram
+chart = alt.Chart(goals_df).mark_bar(
+    color='white',
+    stroke='black',
+    strokeWidth=1,
+    opacity=0.8
+    ).encode(
+    x=alt.X('goals:O',
+    title='Number of goals',
+    scale=alt.Scale(domain=list(range(11))),
+    axis=alt.Axis(values=list(range(11)))
+    ),
+    y=alt.Y('count():Q',
+    title='Number of matches',
+    scale=alt.Scale(domain=[0, 100]),
+    axis=alt.Axis(values=list(range(0, 101, 20)))
+    )
+    ).properties(width=600,height=400).resolve_scale(y='independent'
+)
 
-seconds_in_a_game = framespersecond * minspergame * seconds_in_a_min
-#st.write(seconds_in_a_game*12)
-
-
-#uploaded_file = st.file_uploader("CLICK TO UPLOAD")
-#st.header("Make sure to upload a file in order to view the data!")
-
-#if uploaded_file is not None:
- #   db = pd.read_csv(uploaded_file)
-
-  #  st.dataframe(db)
-
-    #st.bar_chart(data=animal_db, x="Name",y="Speed (km/H)")
-
-    #st.scatter_chart(animal_db,x="Name",y="Speed (km/H)")
-
-   # db["goals per shot"] = db["Goals"]/db["Total Shots (inc. Blocks)"]
-
-    #variable_x = st.selectbox("Pick Your X Variable!",db.columns.to_list(),1)
-   #variable_y = st.selectbox("Pick Your Y Variable!",db.columns.to_list(),0)
-
-
-    #st.scatter_chart(db,x=variable_x,y=variable_y)
-
-
-
-    #variable_size = st.selectbox("What determines the size of the dots?",db.columns.to_list(),3)
-    #variable_color = st.selectbox("What determines the color of the data points?",db.columns.to_list(),2)
-
-
-
-    #st.write(goalspershot)
-
-    #chart = alt.Chart(db).mark_circle().encode(
-     #       x=variable_x,
-      #      y=variable_y,
-       #     size=alt.Size(variable_size,legend=None),
-        #    color=alt.Color(variable_color,legend=None),
-         #   tooltip=["Player","Team","Age","Goals","Total Shots (inc. Blocks)"]).properties(height=500).interactive()
-
-    #st.altair_chart(chart, theme="streamlit", use_container_width=True)
-
+with st.expander("The same simulation as above, repeated 380 times!"):
+    st.altair_chart(chart, use_container_width=True)
